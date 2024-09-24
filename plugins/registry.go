@@ -10,12 +10,14 @@ import (
 type Source interface {
 	Init(config map[string]interface{}, model *models.Model) error
 	FetchData() ([]map[string]interface{}, error)
+	Close() error
 }
 
 // Destination interface
 type Destination interface {
 	Init(config map[string]interface{}, model *models.Model) error
 	StoreData(data []map[string]interface{}) error
+	Close() error
 }
 
 type SourceFactory func() Source

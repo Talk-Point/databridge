@@ -2,10 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
-	"reflect"
 
 	"github.com/Talk-Point/databridge/models"
 	_ "github.com/Talk-Point/databridge/plugins/destination_plugins/timescaledb"
@@ -64,8 +62,6 @@ func main() {
 		log.Fatalf("Error fetching data: %v", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("Column data: %v, Type: %v\n", data[0], reflect.TypeOf(data[0]))
 
 	// Store data
 	err = destination.StoreData(data)

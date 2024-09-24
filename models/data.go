@@ -13,6 +13,7 @@ const (
 	BigInt
 	Float
 	DateTime
+	DateTimeNullable
 	Int
 )
 

@@ -98,6 +98,10 @@ func (s *SQLAPISource) FetchData() ([]map[string]interface{}, error) {
 	return records, nil
 }
 
+func (s *SQLAPISource) Close() error {
+	return nil
+}
+
 func convert(value string, columnType models.ColumnType) (interface{}, error) {
 	switch columnType {
 	case models.String:
