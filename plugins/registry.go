@@ -16,7 +16,7 @@ type Source interface {
 // Destination interface
 type Destination interface {
 	Init(config map[string]interface{}, model *models.Model) error
-	StoreData(data []map[string]interface{}) error
+	StoreData(data []map[string]interface{}) (int, int, error)
 	Close() error
 }
 

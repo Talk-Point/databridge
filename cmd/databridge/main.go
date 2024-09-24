@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 
 	"github.com/Talk-Point/databridge/models"
@@ -11,9 +10,12 @@ import (
 
 	"github.com/Talk-Point/databridge/config"
 	"github.com/Talk-Point/databridge/plugins"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
+	log.SetLevel(log.DebugLevel)
+
 	// Parse flags to get the config file path
 	configPath := flag.String("config", "config.yaml", "Path to configuration file")
 	flag.Parse()
@@ -64,11 +66,22 @@ func main() {
 	}
 
 	// Store data
-	err = destination.StoreData(data)
+	totalSuccess, totalErrored, err := destination.StoreData(data)
 	if err != nil {
 		log.Fatalf("Error storing data: %v", err)
 		os.Exit(1)
 	}
 
-	log.Println("Data transfer completed successfully.")
+	if totalErrored > 0 {
+		log.WithFields(log.Fields{
+			"total_success": totalSuccess,
+			"total_errored": totalErrored,
+		}).Error("Data transfer completed with errors.")
+		os.Exit(1)
+	} else {
+		log.WithFields(log.Fields{
+			"total_success": totalSuccess,
+			"total_errored": totalErrored,
+		}).Info("Data transfer completed successfully.")
+	}
 }

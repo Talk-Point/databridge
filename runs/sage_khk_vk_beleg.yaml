@@ -32,7 +32,7 @@ model:
       type: string
     - name: a2_land
       type: string
-  unique_key: [bel_id]
+  unique_key: [bel_id, time]
 
 source:
   type: sql_api
