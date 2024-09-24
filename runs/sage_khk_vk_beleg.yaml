@@ -1,0 +1,62 @@
+name: sage_khk_vk_beleg
+
+model:
+  columns:
+    - name: mandant
+      type: string
+    - name: bel_id
+      type: bigint
+    - name: vor_id
+      type: bigint
+    - name: belegkennzeichen
+      type: string
+    - name: belegart
+      type: string
+    - name: kundengruppe
+      type: string
+    - name: nettobetrag_ew
+      type: float
+    - name: bruttobetrag_ew
+      type: float
+    - name: time
+      type: datetime
+    - name: user_zahlungsreferenz
+      type: string
+    - name: user_bezahlt
+      type: int
+    - name: user_mahnstufe
+      type: int
+    - name: a0_land
+      type: string
+    - name: a1_land
+      type: string
+    - name: a2_land
+      type: string
+  unique_key: [bel_id]
+
+source:
+  type: sql_api
+  endpoint: https://shopcloud-data-api-3fmi7muj.ew.gateway.dev/erp/query
+  query: |
+    SELECT
+      Mandant AS mandant,
+      BelID AS bel_id,
+      VorID AS vor_id,
+      Belegkennzeichen AS belegkennzeichen,
+      Belegart AS belegart,
+      Kundengruppe AS kundengruppe,
+      NettobetragEW AS nettobetrag_ew,
+      BruttobetragEW AS bruttobetrag_ew,
+      USER_CD AS time,
+      USER_Zahlungsreferenz AS user_zahlungsreferenz,
+      USER_Bezahlt AS user_bezahlt,
+      USER_Mahnstufe AS user_mahnstufe,
+      A0Land AS a0_land,
+      A1Land AS a1_land,
+      A2Land AS a2_land
+    FROM KHKVKBelege
+    WHERE USER_CD>='{date} 00:00:00' AND USER_CD<='{date} 23:59:59'
+
+destination:
+  type: timescaledb
+  table: khk_vk_beleg
