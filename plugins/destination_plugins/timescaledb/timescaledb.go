@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Talk-Point/databridge/models"
 	"github.com/Talk-Point/databridge/plugins"
 	_ "github.com/lib/pq"
 )
@@ -15,7 +16,7 @@ type TimescaleDBDestination struct {
 	Schema map[string]string // Column types
 }
 
-func (d *TimescaleDBDestination) Init(config map[string]interface{}) error {
+func (d *TimescaleDBDestination) Init(config map[string]interface{}, model *models.Model) error {
 	connStr := os.Getenv("TIMESCALEDB_CONN_STR")
 	if connStr == "" {
 		return fmt.Errorf("TIMESCALEDB_CONN_STR environment variable is required")

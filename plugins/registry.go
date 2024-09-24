@@ -2,17 +2,19 @@ package plugins
 
 import (
 	"fmt"
+
+	"github.com/Talk-Point/databridge/models"
 )
 
 // Source interface
 type Source interface {
-	Init(config map[string]interface{}) error
+	Init(config map[string]interface{}, model *models.Model) error
 	FetchData() ([]map[string]interface{}, error)
 }
 
 // Destination interface
 type Destination interface {
-	Init(config map[string]interface{}) error
+	Init(config map[string]interface{}, model *models.Model) error
 	StoreData(data []map[string]interface{}) error
 }
 
