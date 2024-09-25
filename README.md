@@ -4,6 +4,19 @@ ETL to from various data sources to a data warehouse. Start to build the own etl
 
 ## Usage
 
+Best case is to run this with docker image
+
+```sh
+docker run --rm \
+  -e API_TOKEN="<api-key>" \
+  -e TIMESCALEDB_CONN_STR="postgresql://postgres:password@localhost:5432/postgres" \
+  databridge \
+  -config "examples/sage_khk_vk_belege.yaml" \
+  -run-schema \
+  -log-level debug \
+  -date 2024-09-25
+```
+
 ```sh
 $ go run cmd/databridge/main.go -config "runs/sage_khk_vk_beleg.yaml" -start "2024-09-25T00:00:00Z" -end "2024-09-25T23:59:59Z"
 $ go run cmd/databridge/main.go -config "runs/sage_khk_vk_beleg.yaml" -interval 30m
