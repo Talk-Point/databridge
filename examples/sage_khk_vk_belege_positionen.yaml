@@ -1,0 +1,100 @@
+name: sage_khk_vk_belege_positionen
+
+model:
+  columns:
+    - name: mandant
+      type: int
+    - name: bel_id
+      type: bigint
+    - name: bel_pos_id
+      type: bigint
+    - name: time
+      type: datetime
+    - name: vor_id
+      type: bigint
+    - name: vor_pos_id
+      type: bigint
+    - name: position
+      type: int
+    - name: artikelnummer
+      type: string
+    - name: auspraegung_id
+      type: int
+    - name: bezeichnung1
+      type: string
+    - name: bezeichnung2
+      type: string
+    - name: gesamtpreis_intern_ew
+      type: float
+    - name: einzelpreis
+      type: float
+    - name: mittlerer_ek
+      type: float
+    - name: roherloes
+      type: float
+    - name: menge
+      type: float
+    - name: ist_erledigt
+      type: int
+    - name: mengeneinheit
+      type: string
+    - name: menge_vp_einheit
+      type: string
+    - name: user_versandklasse
+      type: string
+    - name: user_zulieferer_code
+      type: string
+    - name: user_zulieferer_artikelnummer
+      type: string
+    - name: artikelgruppe
+      type: string
+  unique_key: [bel_pos_id, time]
+
+source:
+  type: sql_api
+  endpoint: https://shopcloud-data-api-3fmi7muj.ew.gateway.dev/erp/query
+  query: |
+    SELECT
+        KHKVKBelegePositionen.Mandant AS mandant,
+        KHKVKBelegePositionen.BelID AS bel_id,
+        KHKVKBelegePositionen.BelPosID AS bel_pos_id,
+        KHKVKBelege.VorID AS vor_id,
+        KHKVKBelege.USER_CD AS time,
+        KHKVKBelegePositionen.VorPosID AS vor_pos_id,
+        KHKVKBelegePositionen.Position AS position,
+        KHKVKBelegePositionen.Artikelnummer AS artikelnummer,
+        KHKVKBelegePositionen.AuspraegungID AS auspraegung_id,
+        KHKVKBelegePositionen.Bezeichnung1 AS bezeichnung1,
+        KHKVKBelegePositionen.Bezeichnung2 AS bezeichnung2,
+        KHKVKBelegePositionen.GesamtpreisInternEW AS gesamtpreis_intern_ew,
+        KHKVKBelegePositionen.Einzelpreis AS einzelpreis,
+        KHKVKBelegePositionen.MittlererEK AS mittlerer_ek,
+        KHKVKBelegePositionen.Roherloes AS roherloes,
+        KHKVKBelegePositionen.Menge AS menge,
+        KHKVKBelegePositionen.IstErledigt AS ist_erledigt,
+        KHKVKBelegePositionen.Mengeneinheit AS mengeneinheit,
+        KHKVKBelegePositionen.MengeVPEinheit AS menge_vp_einheit,
+        KHKArtikel.USER_Versandklasse AS user_versandklasse,
+        CASE 
+            WHEN COALESCE(KHKArtikel.USER_SoneparArtikel, '') != '' THEN 'sp'
+            WHEN COALESCE(KHKArtikel.USER_EPArtikel, '') != '' THEN 'ep'
+            ELSE COALESCE(NULLIF(KHKArtikel.USER_ZuliefererCode, ''), 'tp')
+        END AS user_zulieferer_code,
+        CASE 
+            WHEN COALESCE(KHKArtikel.USER_SoneparArtikel, '') != '' THEN KHKArtikel.USER_SoneparArtikel
+            WHEN COALESCE(KHKArtikel.USER_EPArtikel, '') != '' THEN KHKArtikel.USER_EPArtikel
+            ELSE KHKArtikel.USER_ZuliefererArtikelnummer
+        END AS user_zulieferer_artikelnummer,
+      KHKVKBelegePositionen.Artikelgruppe AS artikelgruppe
+    FROM KHKVKBelegePositionen
+    LEFT JOIN KHKVKBelege 
+        ON KHKVKBelegePositionen.Mandant = KHKVKBelege.Mandant
+        AND KHKVKBelegePositionen.BelID = KHKVKBelege.BelID
+    LEFT JOIN KHKArtikel 
+        ON KHKVKBelegePositionen.Mandant = KHKArtikel.Mandant
+        AND KHKVKBelegePositionen.Artikelnummer = KHKArtikel.Artikelnummer
+    WHERE KHKVKBelege.USER_CD>='{start_at}' AND KHKVKBelege.USER_CD<='{end_at}'
+
+destination:
+  type: timescaledb
+  table: khk_vk_belege_positionen
