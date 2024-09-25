@@ -6,6 +6,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const Version = "#VERSION#"
+
 // Define structs matching your configuration schema
 type Config struct {
 	Name        string       `yaml:"name"`

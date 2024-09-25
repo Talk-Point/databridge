@@ -13,22 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func main() {
-	// Parse Flags
-	flags := pkg.NewTimePartitionParams()
-	flags.ParseFlags()
-
-	if flags.LogLevel != "" {
-		level, err := log.ParseLevel(flags.LogLevel)
-		if err != nil {
-			log.Fatalf("Invalid log level: %v", err)
-			os.Exit(1)
-		}
-		log.SetLevel(level)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
-
+func run(flags *pkg.TimePartitionParams) {
 	// Load configuration
 	cfg, err := config.LoadConfig(flags.ConfigPath)
 	if err != nil {
@@ -105,4 +90,23 @@ func main() {
 			"total_errored": totalErrored,
 		}).Info("data transfer completed successfully.")
 	}
+}
+
+func main() {
+	// Parse Flags
+	flags := pkg.NewTimePartitionParams()
+	flags.ParseFlags()
+
+	if flags.LogLevel != "" {
+		level, err := log.ParseLevel(flags.LogLevel)
+		if err != nil {
+			log.Fatalf("Invalid log level: %v", err)
+			os.Exit(1)
+		}
+		log.SetLevel(level)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
+
+	run(flags)
 }
