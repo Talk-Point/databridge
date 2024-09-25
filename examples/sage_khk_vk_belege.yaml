@@ -1,9 +1,9 @@
-name: sage_khk_vk_beleg
+name: sage_khk_vk_belege
 
 model:
   columns:
     - name: mandant
-      type: string
+      type: int
     - name: bel_id
       type: bigint
     - name: vor_id
@@ -101,4 +101,4 @@ source:
 
 destination:
   type: timescaledb
-  table: khk_vk_beleg
+  table: khk_vk_belege
