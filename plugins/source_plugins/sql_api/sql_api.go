@@ -173,6 +173,20 @@ func convert(value string, columnType models.ColumnType) (interface{}, error) {
 			return nil, err
 		}
 		return value, nil
+	case models.DateTimeNullable:
+		// convert string to datetime
+		if value == "" {
+			return nil, nil
+		}
+		loc, err := time.LoadLocation("Europe/Berlin")
+		if err != nil {
+			return nil, err
+		}
+		value, err := time.ParseInLocation("02.01.2006 15:04:05", value, loc)
+		if err != nil {
+			return nil, err
+		}
+		return value, nil
 	case models.Int:
 		// convert string to int
 		value, err := strconv.Atoi(value)

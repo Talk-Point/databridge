@@ -211,6 +211,7 @@ func (d *TimescaleDBDestination) StoreData(data []map[string]interface{}) (int, 
 				"idx":    idx,
 				"record": record,
 				"type":   "failed",
+				"error":  err,
 			}).Error("inserting record")
 			total_failed++
 		} else {

@@ -1,0 +1,104 @@
+name: sage_khk_vk_beleg
+
+model:
+  columns:
+    - name: mandant
+      type: string
+    - name: bel_id
+      type: bigint
+    - name: vor_id
+      type: bigint
+    - name: belegkennzeichen
+      type: string
+    - name: belegart
+      type: string
+    - name: kundengruppe
+      type: string
+    - name: kopftext
+      type: string
+    - name: referenznummer
+      type: string
+    - name: lieferbedingung
+      type: string
+    - name: user_kom_bearbeiter
+      type: string
+    - name: user_kom_zeit
+      type: datetime_nullable
+    - name: user_zahlungsreferenz
+      type: string
+    - name: time
+      type: datetime
+    - name: user_belegjahr_belegnummer
+      type: string
+    - name: nettobetrag_ew
+      type: float
+    - name: bruttobetrag_ew
+      type: float
+    - name: versand
+      type: string
+    - name: user_bezahlt
+      type: int
+    - name: user_mahnstufe
+      type: int
+    - name: zahlungskond
+      type: string
+    - name: inkassoart
+      type: string
+    - name: betrag
+      type: float
+    - name: email
+      type: string
+    - name: telefon
+      type: string
+    - name: a0_land
+      type: string
+    - name: a1_land
+      type: string
+    - name: memo
+      type: string
+    - name: wkz
+      type: string
+  unique_key: [bel_id, time]
+
+source:
+  type: sql_api
+  endpoint: https://shopcloud-data-api-3fmi7muj.ew.gateway.dev/erp/query
+  query: |
+    SELECT
+      KHKVKBelege.Mandant AS mandant,
+      KHKVKBelege.VorID AS vor_id,
+      KHKVKBelege.BelID AS bel_id,
+      KHKVKBelege.Belegkennzeichen AS belegkennzeichen,
+      KHKVKBelege.Belegart AS belegart,
+      KHKVKBelege.Kundengruppe AS kundengruppe,
+      KHKVKBelege.Kopftext AS kopftext,
+      KHKVKBelege.Referenznummer AS referenznummer,
+      KHKVKBelege.Lieferbedingung AS lieferbedingung,
+      KHKVKBelege.USER_KomBearbeiter AS user_kom_bearbeiter,
+      KHKVKBelege.USER_KomZeit AS user_kom_zeit,
+      KHKVKBelege.USER_Zahlungsreferenz AS user_zahlungsreferenz,
+      KHKVKBelege.USER_CD AS time,
+      KHKVKBelege.USER_BelegjahrBelegnummer AS user_belegjahr_belegnummer,
+      KHKVKBelege.NettobetragEW AS nettobetrag_ew,
+      KHKVKBelege.BruttobetragEW AS bruttobetrag_ew,
+      KHKVKBelege.Versand AS versand,
+      KHKVKBelege.USER_Bezahlt AS user_bezahlt,
+      KHKVKBelege.USER_Mahnstufe AS user_mahnstufe,
+      KHKVKBelegeZKD.Zahlungskond AS zahlungskond,
+      KHKVKBelegeZKD.Inkassoart AS inkassoart,
+      KHKVKBelegeZKD.Betrag AS betrag,
+      KHKAdressen.EMail AS email,
+      KHKAdressen.Telefon AS telefon,
+      KHKVKBelege.A0Land AS a0_land,
+      KHKVKBelege.A1Land AS a1_land,
+      KHKVKBelege.Memo AS memo,
+      KHKVKBelege.Wkz AS wkz
+    FROM KHKVKBelege
+    LEFT JOIN KHKVKBelegeZKD ON KHKVKBelege.BelID=KHKVKBelegeZKD.BelID
+      AND KHKVKBelege.Mandant=KHKVKBelegeZKD.Mandant
+    LEFT JOIN KHKAdressen ON KHKAdressen.Adresse=KHKVKBelege.A0AdressNr
+    WHERE USER_CD>='{start_at}' AND USER_CD<='{end_at}'
+
+destination:
+  type: timescaledb
+  table: khk_vk_beleg

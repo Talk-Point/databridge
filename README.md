@@ -5,7 +5,7 @@ ETL to from various data sources to a data warehouse.
 ## Usage
 
 ```sh
-$ go run cmd/databridge/main.go -config "runs/sage_khk_vk_beleg.yaml" -start "2024-09-23T00:00:00Z" -end "2024-09-23T00:00:00Z"
+$ go run cmd/databridge/main.go -config "runs/sage_khk_vk_beleg.yaml" -start "2024-09-25T00:00:00Z" -end "2024-09-25T23:59:59Z"
 $ go run cmd/databridge/main.go -config "runs/sage_khk_vk_beleg.yaml" -interval 30m
 ```
 

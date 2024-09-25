@@ -31,6 +31,8 @@ func ParseColumnType(s string) (ColumnType, error) {
 		return Float, nil
 	case "datetime":
 		return DateTime, nil
+	case "datetime_nullable":
+		return DateTimeNullable, nil
 	case "int":
 		return Int, nil
 	default:
