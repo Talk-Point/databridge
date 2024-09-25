@@ -16,6 +16,7 @@ $ go run cmd/databridge/main.go -config "runs/sage_khk_vk_beleg.yaml" -interval 
     - `-interval` Interval in minutes
     - `-start` Start time in RFC3339 format
     - `-end` End time in RFC3339 format
+    - `-date` Date like 2024-09-25
 - `-run-schema` Run schema
 - `-dry-run` Dry run mode
 - `-log-level` Log level (default "info")
