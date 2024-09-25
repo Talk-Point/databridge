@@ -23,9 +23,6 @@ jobs:
           make setup
       - name: Run build
         run: |
-          make build
-      - name: Run build with docker
-        run: |
           make build-docker
       - name: Run tests
         run: |
