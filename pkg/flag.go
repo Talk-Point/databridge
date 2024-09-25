@@ -7,6 +7,7 @@ import (
 )
 
 type TimePartitionParams struct {
+	LogLevel   string
 	ConfigPath string
 	RunSchema  bool
 	Start      string
@@ -25,6 +26,7 @@ func NewTimePartitionParams() *TimePartitionParams {
 
 func (p *TimePartitionParams) ParseFlags() error {
 	// Define CLI parameters
+	flag.StringVar(&p.LogLevel, "log-level", "info", "Log level (debug, info, warn, error, fatal, panic)")
 	flag.StringVar(&p.ConfigPath, "config", "config.yaml", "Path to configuration file")
 	flag.BoolVar(&p.RunSchema, "run-schema", false, "run schema query")
 	flag.StringVar(&p.Start, "start", "", "Start time in RFC3339 format (e.g., 2024-09-01T00:00:00Z)")

@@ -14,11 +14,20 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.DebugLevel)
-
 	// Parse Flags
 	flags := pkg.NewTimePartitionParams()
 	flags.ParseFlags()
+
+	if flags.LogLevel != "" {
+		level, err := log.ParseLevel(flags.LogLevel)
+		if err != nil {
+			log.Fatalf("Invalid log level: %v", err)
+			os.Exit(1)
+		}
+		log.SetLevel(level)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
 
 	// Load configuration
 	cfg, err := config.LoadConfig(flags.ConfigPath)

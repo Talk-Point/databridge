@@ -1,6 +1,6 @@
 # DataBridge
 
-ETL to from various data sources to a data warehouse.
+ETL to from various data sources to a data warehouse. Start to build the own etl tool, why no other tool we found bring the performance or has a connector to time series databases.
 
 ## Usage
 
