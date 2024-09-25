@@ -55,7 +55,7 @@ source:
       A1Land AS a1_land,
       A2Land AS a2_land
     FROM KHKVKBelege
-    WHERE USER_CD>='{date} 00:00:00' AND USER_CD<='{date} 23:59:59'
+    WHERE USER_CD>='{start_at}' AND USER_CD<='{end_at}'
 
 destination:
   type: timescaledb

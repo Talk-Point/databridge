@@ -62,7 +62,7 @@ func (d *TimescaleDBDestination) getSQLType(columnType models.ColumnType) string
 	}
 }
 
-func (d *TimescaleDBDestination) GetSchema() ([]string, error) {
+func (d *TimescaleDBDestination) CreateSchema() ([]string, error) {
 	var stm strings.Builder
 
 	stm.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n", d.Table))
@@ -84,7 +84,7 @@ func (d *TimescaleDBDestination) GetSchema() ([]string, error) {
 				stm.WriteString(", ")
 			}
 		}
-		stm.WriteString(", time)\n")
+		stm.WriteString(")\n")
 	}
 
 	stm.WriteString(");\n")
@@ -92,6 +92,35 @@ func (d *TimescaleDBDestination) GetSchema() ([]string, error) {
 	create_hypertable := fmt.Sprintf("SELECT create_hypertable('%s', 'time', if_not_exists => TRUE);", d.Table)
 
 	return []string{stm.String(), create_hypertable}, nil
+}
+
+func (d *TimescaleDBDestination) RunSchema() error {
+	queries, err := d.CreateSchema()
+	if err != nil {
+		return err
+	}
+
+	connStr := os.Getenv("TIMESCALEDB_CONN_STR")
+	if !strings.Contains(connStr, "sslmode") {
+		connStr += "?sslmode=disable"
+	}
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return fmt.Errorf("unable to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	for _, query := range queries {
+		log.WithFields(log.Fields{
+			"query": query,
+		}).Debug("Running schema queries")
+		_, err := db.Exec(query)
+		if err != nil {
+			return fmt.Errorf("error running schema query: %v", err)
+		}
+	}
+
+	return nil
 }
 
 func (d *TimescaleDBDestination) InsertQuery() string {

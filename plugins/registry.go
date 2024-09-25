@@ -9,7 +9,7 @@ import (
 // Source interface
 type Source interface {
 	Init(config map[string]interface{}, model *models.Model) error
-	FetchData() ([]map[string]interface{}, error)
+	FetchData(opts map[string]interface{}) ([]map[string]interface{}, error)
 	Close() error
 }
 
@@ -17,6 +17,7 @@ type Source interface {
 type Destination interface {
 	Init(config map[string]interface{}, model *models.Model) error
 	StoreData(data []map[string]interface{}) (int, int, error)
+	RunSchema() error
 	Close() error
 }
 

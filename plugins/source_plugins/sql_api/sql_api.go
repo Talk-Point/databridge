@@ -3,6 +3,7 @@ package sql_api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,6 +17,36 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type SQLAPIParams struct {
+	StartAt time.Time
+	EndAt   time.Time
+}
+
+func ParseOpts(opts map[string]interface{}) (SQLAPIParams, error) {
+	params := SQLAPIParams{}
+	if startAt, ok := opts["start_at"]; ok {
+		if startAtTime, ok := startAt.(time.Time); ok {
+			params.StartAt = startAtTime
+		} else {
+			return SQLAPIParams{}, errors.New("start_at is not of type time.Time")
+		}
+	} else {
+		return SQLAPIParams{}, errors.New("start_at is missing")
+	}
+
+	if endAt, ok := opts["end_at"]; ok {
+		if endAtTime, ok := endAt.(time.Time); ok {
+			params.EndAt = endAtTime
+		} else {
+			return SQLAPIParams{}, errors.New("end_at is not of type time.Time")
+		}
+	} else {
+		return SQLAPIParams{}, errors.New("end_at is missing")
+	}
+
+	return params, nil
+}
+
 type SQLAPISource struct {
 	Model    *models.Model
 	Endpoint string
@@ -26,21 +57,31 @@ type SQLAPISource struct {
 
 func (s *SQLAPISource) Init(config map[string]interface{}, model *models.Model) error {
 	s.Model = model
-	// Extract and validate configuration parameters
 	s.Endpoint = config["endpoint"].(string)
 	s.APIToken = os.Getenv("API_TOKEN")
 	if s.APIToken == "" {
 		return fmt.Errorf("API_TOKEN environment variable is required")
 	}
 	s.Query = config["query"].(string)
-	// Handle dynamic date parameter
-	s.Date = time.Now().Format("02.01.2006")
 	return nil
 }
 
-func (s *SQLAPISource) FetchData() ([]map[string]interface{}, error) {
-	// Replace {date} in the query
-	query := strings.ReplaceAll(s.Query, "{date}", s.Date)
+func (s *SQLAPISource) FetchData(opts map[string]interface{}) ([]map[string]interface{}, error) {
+	params, err := ParseOpts(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	startAt := params.StartAt.Format("02.01.2006 15:04:05")
+	endAt := params.EndAt.Format("02.01.2006 15:04:05")
+	log.WithFields(log.Fields{
+		"start_at": startAt,
+		"end_at":   endAt,
+	}).Info("SQLAPISource:FetchData")
+
+	query := s.Query
+	query = strings.ReplaceAll(query, "{start_at}", params.StartAt.Format("02.01.2006 15:04:05"))
+	query = strings.ReplaceAll(query, "{end_at}", params.EndAt.Format("02.01.2006 15:04:05"))
 
 	// Prepare the request
 	reqBody := map[string]string{"query": query}
