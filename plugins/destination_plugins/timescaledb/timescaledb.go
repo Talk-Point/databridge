@@ -13,10 +13,11 @@ import (
 )
 
 type TimescaleDBDestination struct {
-	Model  *models.Model
-	DB     *sql.DB
-	Table  string
-	Schema map[string]string // Column types
+	Model     *models.Model
+	DB        *sql.DB
+	Table     string
+	Schema    map[string]string // Column types
+	BatchSize int
 }
 
 func (d *TimescaleDBDestination) Init(config map[string]interface{}, model *models.Model) error {
@@ -191,6 +192,10 @@ func contains(slice []string, item string) bool {
 }
 
 func (d *TimescaleDBDestination) StoreData(data []map[string]interface{}) (int, int, error) {
+	return d.StoreDataBatch(data)
+}
+
+func (d *TimescaleDBDestination) StoreDataSingle(data []map[string]interface{}) (int, int, error) {
 	connStr := os.Getenv("TIMESCALEDB_CONN_STR")
 	if !strings.Contains(connStr, "sslmode") {
 		connStr += "?sslmode=disable"
@@ -241,8 +246,111 @@ func (d *TimescaleDBDestination) StoreData(data []map[string]interface{}) (int, 
 	return total_success, total_failed, nil
 }
 
+func (d *TimescaleDBDestination) StoreDataBatch(data []map[string]interface{}) (int, int, error) {
+	connStr := os.Getenv("TIMESCALEDB_CONN_STR")
+	if !strings.Contains(connStr, "sslmode") {
+		connStr += "?sslmode=disable"
+	}
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return 0, 0, fmt.Errorf("unable to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	q := d.InsertQuery()
+	log.WithFields(log.Fields{
+		"query":        q,
+		"destionation": "timescaledb",
+	}).Debug("insert query")
+
+	totalSuccess := 0
+	totalFailed := 0
+	batchSize := d.BatchSize
+	batch := make([][]interface{}, 0, batchSize)
+
+	executeBatch := func() error {
+		tx, err := db.Begin()
+		if err != nil {
+			return err
+		}
+		stmt, err := tx.Prepare(q)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		for _, values := range batch {
+			_, err := stmt.Exec(values...)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		err = tx.Commit()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	for idx, record := range data {
+		values := make([]interface{}, len(d.Model.Columns))
+		for i, column := range d.Model.Columns {
+			if record[column.Name] == "" {
+				values[i] = nil
+				continue
+			}
+			values[i] = record[column.Name]
+		}
+		batch = append(batch, values)
+
+		if len(batch) == batchSize {
+			err := executeBatch()
+			if err != nil {
+				log.WithFields(log.Fields{
+					"idx":   idx,
+					"batch": batch,
+					"type":  "failed",
+					"error": err,
+				}).Error("inserting batch")
+				totalFailed += len(batch)
+			} else {
+				log.WithFields(log.Fields{
+					"batch_size": batchSize,
+					"type":       "success",
+				}).Debug("inserting batch")
+				totalSuccess += len(batch)
+			}
+			batch = batch[:0]
+		}
+	}
+
+	if len(batch) > 0 {
+		err := executeBatch()
+		if err != nil {
+			log.WithFields(log.Fields{
+				"batch": batch,
+				"type":  "failed",
+				"error": err,
+			}).Error("inserting batch")
+			totalFailed += len(batch)
+		} else {
+			log.WithFields(log.Fields{
+				"batch_size": len(batch),
+				"type":       "success",
+			}).Debug("inserting batch")
+			totalSuccess += len(batch)
+		}
+	}
+
+	return totalSuccess, totalFailed, nil
+}
+
 func init() {
 	plugins.RegisterDestination("timescaledb", func() plugins.Destination {
-		return &TimescaleDBDestination{}
+		return &TimescaleDBDestination{
+			BatchSize: 1000,
+		}
 	})
 }
