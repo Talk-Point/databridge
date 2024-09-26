@@ -10,7 +10,7 @@ Best case is to run this with docker image
 docker run --rm \
   -e API_TOKEN="<api-key>" \
   -e TIMESCALEDB_CONN_STR="postgresql://postgres:password@localhost:5432/postgres" \
-  databridge \
+  talkpoint/databridge \
   -config "examples/sage_khk_vk_belege.yaml" \
   -run-schema \
   -log-level debug \

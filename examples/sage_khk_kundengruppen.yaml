@@ -1,0 +1,27 @@
+name: sage_khk_kundengruppen
+
+model:
+  columns:
+    - name: mandant
+      type: int
+    - name: kundengruppe
+      type: string
+    - name: title
+      type: string
+  unique_key: [kundengruppe]
+
+source:
+  type: sql_api
+  endpoint: https://shopcloud-data-api-3fmi7muj.ew.gateway.dev/erp/query
+  query: |
+    SELECT
+      Mandant AS mandant,
+      Gruppe AS kundengruppe,
+      Bezeichnung AS title
+    FROM KHKGruppen
+    WHERE Mandant=1 
+      AND Typ=11
+
+destination:
+  type: timescaledb
+  table: khk_kundengruppen

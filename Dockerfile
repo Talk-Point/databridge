@@ -13,4 +13,4 @@ WORKDIR /root/
 COPY --from=builder /app/databridge .
 COPY --from=builder /app/examples examples
 EXPOSE 8080
-ENTRYPOINT ["./databridge"]
+ENTRYPOINT ["databridge"]
