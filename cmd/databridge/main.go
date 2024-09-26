@@ -5,6 +5,7 @@ import (
 
 	"github.com/Talk-Point/databridge/models"
 	"github.com/Talk-Point/databridge/pkg"
+	"github.com/Talk-Point/databridge/pkg/kestra"
 	_ "github.com/Talk-Point/databridge/plugins/destination_plugins/timescaledb"
 	_ "github.com/Talk-Point/databridge/plugins/source_plugins/sql_api"
 
@@ -78,6 +79,14 @@ func run(flags *pkg.TimePartitionParams) {
 		os.Exit(1)
 	}
 
+	if flags.Kestra {
+		kestra.CounterMetric("total", float64(totalSuccess)).
+			WithTags(map[string]string{"status": "success"}).
+			Log()
+		kestra.CounterMetric("total", float64(totalErrored)).
+			WithTags(map[string]string{"status": "errored"}).
+			Log()
+	}
 	if totalErrored > 0 {
 		log.WithFields(log.Fields{
 			"total_success": totalSuccess,

@@ -319,7 +319,7 @@ func (d *TimescaleDBDestination) StoreDataBatch(data []map[string]interface{}) (
 				log.WithFields(log.Fields{
 					"batch_size": batchSize,
 					"type":       "success",
-				}).Debug("inserting batch")
+				}).Info("inserting batch")
 				totalSuccess += len(batch)
 			}
 			batch = batch[:0]
@@ -339,7 +339,7 @@ func (d *TimescaleDBDestination) StoreDataBatch(data []map[string]interface{}) (
 			log.WithFields(log.Fields{
 				"batch_size": len(batch),
 				"type":       "success",
-			}).Debug("inserting batch")
+			}).Info("inserting batch")
 			totalSuccess += len(batch)
 		}
 	}

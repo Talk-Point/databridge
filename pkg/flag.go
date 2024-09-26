@@ -17,11 +17,15 @@ type TimePartitionParams struct {
 	Location   *time.Location
 	StartTime  time.Time
 	EndTime    time.Time
+	Kestra     bool
 }
 
 func NewTimePartitionParams() *TimePartitionParams {
 	return &TimePartitionParams{
-		Location: time.Local,
+		Location:  time.Local,
+		Kestra:    false,
+		LogLevel:  "info",
+		RunSchema: false,
 	}
 }
 
@@ -34,6 +38,7 @@ func (p *TimePartitionParams) ParseFlags() error {
 	flag.StringVar(&p.Start, "start", "", "Start time in RFC3339 format (e.g., 2024-09-01T00:00:00Z)")
 	flag.StringVar(&p.End, "end", "", "End time in RFC3339 format (e.g., 2024-09-02T00:00:00Z)")
 	flag.StringVar(&p.Interval, "interval", "", "Interval duration (e.g., 30m for 30 minutes)")
+	flag.BoolVar(&p.Kestra, "kestra", false, "Output kestra metrics")
 
 	// Parse CLI flags
 	flag.Parse()
