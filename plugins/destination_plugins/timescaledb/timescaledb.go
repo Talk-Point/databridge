@@ -63,6 +63,8 @@ func (d *TimescaleDBDestination) getSQLType(columnType models.ColumnType) string
 }
 
 func (d *TimescaleDBDestination) CreateSchema() ([]string, error) {
+	queries := []string{}
+
 	var stm strings.Builder
 
 	stm.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n", d.Table))
@@ -89,9 +91,21 @@ func (d *TimescaleDBDestination) CreateSchema() ([]string, error) {
 
 	stm.WriteString(");\n")
 
-	create_hypertable := fmt.Sprintf("SELECT create_hypertable('%s', 'time', if_not_exists => TRUE);", d.Table)
+	queries = append(queries, stm.String())
 
-	return []string{stm.String(), create_hypertable}, nil
+	// check if in d.Model.Unique the time column
+	var hasTimeColumn bool
+	for _, key := range d.Model.Unique {
+		if key == "time" {
+			hasTimeColumn = true
+			break
+		}
+	}
+	if hasTimeColumn {
+		queries = append(queries, stm.String())
+	}
+
+	return queries, nil
 }
 
 func (d *TimescaleDBDestination) RunSchema() error {
