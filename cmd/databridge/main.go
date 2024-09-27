@@ -7,6 +7,7 @@ import (
 	"github.com/Talk-Point/databridge/pkg"
 	"github.com/Talk-Point/databridge/pkg/kestra"
 	_ "github.com/Talk-Point/databridge/plugins/destination_plugins/timescaledb"
+	_ "github.com/Talk-Point/databridge/plugins/source_plugins/csv_v1"
 	_ "github.com/Talk-Point/databridge/plugins/source_plugins/sql_api"
 
 	"github.com/Talk-Point/databridge/config"
@@ -64,8 +65,9 @@ func run(flags *pkg.TimePartitionParams) {
 
 	// Fetch data
 	data, err := source.FetchData(map[string]interface{}{
-		"start_at": flags.StartTime,
-		"end_at":   flags.EndTime,
+		"start_at":  flags.StartTime,
+		"end_at":    flags.EndTime,
+		"file_path": flags.FilePath,
 	})
 	if err != nil {
 		log.Fatalf("Error fetching data: %v", err)

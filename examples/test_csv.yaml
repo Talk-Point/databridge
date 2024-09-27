@@ -1,0 +1,21 @@
+name: sage_khk_kundengruppen
+
+model:
+  columns:
+    - name: mandant
+      type: int
+    - name: time
+      type: datetime
+    - name: sensor
+      type: string
+    - name: value
+      type: float
+  unique_key: [mandant, time, sensor]
+
+source:
+  type: csv
+  file: 
+
+destination:
+  type: timescaledb
+  table: ticks
