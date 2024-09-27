@@ -1,0 +1,12 @@
+# Dependabot configuration for Go project
+
+version: 2
+updates:
+  - package-ecosystem: "go" # For Go modules
+    directory: "/" # Root directory where go.mod is located
+    schedule:
+      interval: "daily" # Checks for updates weekly
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 10 # Optional, limits the number of open PRs
+    versioning-strategy: "increase" # Optional, can be 'increase', 'increase-if-necessary', 'lockfile-only', etc.
