@@ -35,11 +35,10 @@ jobs:
       - name: Run databridge
         run: |
           docker run --rm \
-            -e API_TOKEN="secret" \
             -e TIMESCALEDB_CONN_STR="postgresql://postgres:password@localhost:5432/postgres" \
             --network=host \
             talkpoint/databridge:latest \
-            -config "/root/examples/sage_khk_vk_belege.yaml" \
+            -config "/root/examples/test_csv.yaml" \
             -run-schema \
             -log-level debug \
             -file-path /root/examples/test_csv.csv
