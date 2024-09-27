@@ -11,4 +11,4 @@ build:
 	go build -o bin/databridge ./cmd/databridge/main.go
 
 build-docker:
-	docker build -t databridge .
+	docker build -t talkpoint/databridge:latest .

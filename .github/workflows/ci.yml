@@ -27,3 +27,18 @@ jobs:
       - name: Run tests
         run: |
           make test
+      - name: Start TimescaleDB
+        run: |
+          docker run -d --network=host --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password timescale/timescaledb-ha:pg16
+          # Wait for the database to be ready
+          until docker exec timescaledb pg_isready -U postgres; do sleep 1; done
+      - name: Run databridge
+        run: |
+          docker run --rm \
+            -e TIMESCALEDB_CONN_STR="postgresql://postgres:password@localhost:5432/postgres" \
+            --network=host \
+            talkpoint/databridge:latest \
+            -config "/root/examples/test_csv.yaml" \
+            -run-schema \
+            -log-level debug \
+            -file-path /root/examples/test_csv.csv

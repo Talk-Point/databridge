@@ -1,0 +1,4 @@
+mandant,time,sensor,value
+1,2024-09-01T12:00:00,temperature,22.5
+2,2024-09-01T12:05:00,humidity,45.3
+1,2024-09-01T12:10:00,temperature,23.5

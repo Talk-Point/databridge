@@ -103,7 +103,7 @@ func (d *TimescaleDBDestination) CreateSchema() ([]string, error) {
 		}
 	}
 	if hasTimeColumn {
-		queries = append(queries, stm.String())
+		queries = append(queries, fmt.Sprintf("SELECT create_hypertable('%s', 'time', if_not_exists => TRUE);", d.Table))
 	}
 
 	return queries, nil
