@@ -11,7 +11,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        go-version: [ '1.24' ]
+        go-version: [ '1.25' ]
     steps:
       - uses: actions/checkout@v6
       - name: Setup Go ${{ matrix.go-version }}
