@@ -1,5 +1,5 @@
 # Build stage
-ARG GO_VERSION=1.25
+ARG GO_VERSION=1.26
 FROM golang:${GO_VERSION} AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
