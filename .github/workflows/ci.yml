@@ -30,8 +30,14 @@ jobs:
       - name: Start TimescaleDB
         run: |
           docker run -d --network=host --name timescaledb -p 5432:5432 -e POSTGRES_PASSWORD=password timescale/timescaledb-ha:pg16
-          # Wait for the database to be ready
-          until docker exec timescaledb pg_isready -U postgres; do sleep 1; done
+          # Auf den TCP-Listener (5432) warten, nicht nur den lokalen Socket:
+          # das HA-Image oeffnet den Unix-Socket frueher als den TCP-Port, sonst
+          # bekommt die App 'connection refused'. -h/-p erzwingt die TCP-Pruefung.
+          for i in $(seq 1 60); do
+            docker exec timescaledb pg_isready -h 127.0.0.1 -p 5432 -U postgres && break
+            echo "warte auf TimescaleDB (TCP 5432)... ($i)"; sleep 2
+          done
+          docker exec timescaledb pg_isready -h 127.0.0.1 -p 5432 -U postgres
       - name: Run databridge
         run: |
           docker run --rm \
